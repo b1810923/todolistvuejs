@@ -1,0 +1,84 @@
+<html>
+<head>
+  <title>Todo App</title>
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+  <link rel="stylesheet" href="style.css" type="text/css" media="screen" charset="utf-8">
+</head>
+<body>
+  <div class="container" id="app">
+    <div>{{text}}</div>
+    <p>
+      <label for="new-task">Add Item</label>
+      <input id="new-task" type="text" v-on:keyup.13="addTodoItem">
+      <button @click="addTodoItem">Add</button>
+    </p>
+    <h3>Todo</h3>
+    <ul id="incomplete-tasks">
+      <todoitem v-for="(todolist,index) in todolist" :key="index" :todolist="todolist" :li-index="index"></todoitem>
+    </ul>
+    <h3>Completed</h3>
+    <ul id="completed-tasks">
+      <todoitem v-for="(todolist,index) in completedlist" :key="index" :todolist="todolist" :li-index="index"></todoitem>
+    </ul>
+  </div>
+<script>
+Vue.component('todoitem',{
+  template:`<li data-index="liIndex">
+              <input type="checkbox" :checked="todolist.check">
+              <label>{{todolist.item}}</label>
+              <button class="delete" @click="deleteItem">Delete</button>
+            </li>`,
+  props:{
+    liIndex:Number,
+    todolist:Object
+  },
+  methods:{
+    deleteItem(){
+      this.$emit();
+    }
+  }
+})
+let vue = new Vue({
+  el:"#app",
+  data:{
+    text:'我們曉得萬事都互相效力，叫愛神的人得益處，就是按他旨意被召的人。(羅馬書 8:28)',
+    todolist:[],
+    completedlist:[]
+  },
+  created(){
+    let completed = new Object();
+    completed.check =true;
+    completed.item = "買衛生紙";
+    this.completedlist.push(completed);
+
+    let todolist = new Object();
+    todolist.check = false;
+    todolist.item = "付信用卡費";
+    this.todolist.push(todolist);
+    let todolistItemTwo = new Object();
+    todolistItemTwo.check = false;
+    todolistItemTwo.item = "還書";
+    this.todolist.push(todolistItemTwo);
+  },
+  methods:{
+    addTodoItem() {
+      let input = document.getElementById('new-task');
+      if(input.value.trim()){
+        let newTodoItem = new Object();
+        newTodoItem.check = false;
+        newTodoItem.item = input.value.trim();
+        this.todolist.push(newTodoItem);
+        input.value = ''; 
+      }else{
+        alert('請輸入代辦事項');
+        return
+      }
+    },
+    deleteitem(data){
+      console.log('deleteItem:',data);
+    }
+  }
+})
+</script>
+</body>
+</html>
