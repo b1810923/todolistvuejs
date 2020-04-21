@@ -14,17 +14,17 @@
     </p>
     <h3>Todo</h3>
     <ul id="incomplete-tasks">
-      <todoitem v-for="(todolist,index) in todolist" :key="index" :todolist="todolist" :li-index="index"></todoitem>
+      <todoitem v-for="(todolist,index) in todolist" :key="index" :todolist="todolist" :li-index="index" @delete-todo="deleteTodoItem" @remove-todo="removeTodoList"></todoitem>
     </ul>
     <h3>Completed</h3>
     <ul id="completed-tasks">
-      <todoitem v-for="(todolist,index) in completedlist" :key="index" :todolist="todolist" :li-index="index"></todoitem>
+      <todoitem v-for="(todolist,index) in completedlist" :key="index" :todolist="todolist" :li-index="index" @delete-todo="deleteTodoItem" @remove-todo="removeTodoList"></todoitem>
     </ul>
   </div>
 <script>
 Vue.component('todoitem',{
-  template:`<li data-index="liIndex">
-              <input type="checkbox" :checked="todolist.check">
+  template:`<li :data-index="liIndex">
+              <input type="checkbox" :checked="todolist.check" @click="removeItem">
               <label>{{todolist.item}}</label>
               <button class="delete" @click="deleteItem">Delete</button>
             </li>`,
@@ -34,7 +34,10 @@ Vue.component('todoitem',{
   },
   methods:{
     deleteItem(){
-      this.$emit();
+      this.$emit('delete-todo' , event);
+    },
+    removeItem(){
+      this.$emit('remove-todo' , event);
     }
   }
 })
@@ -74,8 +77,41 @@ let vue = new Vue({
         return
       }
     },
-    deleteitem(data){
-      console.log('deleteItem:',data);
+    deleteTodoItem(event){
+      const index = event.target.closest('li').dataset.index;
+      const todoType = event.target.closest('ul').id;
+      const isDelete = confirm('Do you want to delete this item ?')? true:false;
+      if(isDelete){
+        this.deleteItem(todoType, index);
+      }
+      
+    },
+    deleteItem(todoType, index){ 
+      switch(todoType){
+        case 'incomplete-tasks':
+          this.todolist.splice(index, 1); 
+          break;
+        case 'completed-tasks': 
+        default: 
+          this.completedlist.splice(index, 1);
+          break;
+      }
+    },
+    removeTodoList(event){
+      const index = event.target.closest('li').dataset.index;
+      const todoType = event.target.closest('ul').id;
+      let moveItem = new Object();
+      
+      if (todoType=='incomplete-tasks'){
+        moveItem.check = true;
+        moveItem.item = this.todolist[index].item;
+        this.completedlist.push(moveItem);
+      } else {
+        moveItem.check = false;
+        moveItem.item = this.completedlist[index].item;
+        this.todolist.push(moveItem);
+      }
+      this.deleteItem(todoType, index);
     }
   }
 })
